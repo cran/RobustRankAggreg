@@ -1,12 +1,14 @@
 
 
+#' Create rank matrix
+#' 
 #' Convert a set of ranked lists into a rank matrix
 #' 
 #' The lists are converted to a format that is used by aggregateRanks. If partial
 #' rankings are given to the function, all the missing values are subtituted by the
 #' maximum rank N, which can be specified manually. This parameter has a very strong
 #' influence on the performance of RRA algorithm, therfore it should be reasonably
-#' accurate. 
+#' accurate. If the N is different for the gene lists, it can be also given as a vector. 
 #' 
 #' Parameter full is used, when full rankings are given, but the sets of ranked elements
 #' do not match perfectly. Then the structurally missing values are substituted with
@@ -31,24 +33,27 @@
 #' 
 #' @export
 rankMatrix <-  function(glist, N = NA, full = FALSE){
-	u <-  unique(c(glist, recursive = TRUE))
+	u = unique(c(glist, recursive = TRUE))
 	
-	if(is.na(N)){
+	if(all(is.na(N))){
 		N = length(u)
 	}
 	if(!full){
-		rmat <- matrix(1, nrow = length(u), ncol = length(glist), dimnames = list(u, names(glist)))
-		N = rep(N, ncol(rmat))
+		rmat = matrix(1, nrow = length(u), ncol = length(glist), dimnames = list(u, names(glist)))
+		if(length(N) == 1){
+			N = rep(N, ncol(rmat))
+		}
 	}
 	else{
-		rmat <- matrix(NA, nrow = length(u), ncol = length(glist), dimnames = list(u, names(glist)))
+		rmat = matrix(NA, nrow = length(u), ncol = length(glist), dimnames = list(u, names(glist)))
 		N = unlist(lapply(glist, length))
 	}
 	for(i in 1:length(glist)){
-		rmat[glist[[i]], i] <- (1:length(glist[[i]])) / N[i]
+		rmat[glist[[i]], i] = (1:length(glist[[i]])) / N[i]
 	}
 	return(rmat)
 }
+
 
 # Output function
 formatOutput <- function(scores, score.names, ordering = "ascending"){
@@ -62,8 +67,35 @@ formatOutput <- function(scores, score.names, ordering = "ascending"){
 	return(res)
 } 
 
+
+# Stuart-Aerts method helper functions
+sumStuart <- function(v, r){
+	k = length(v)
+	l_k = 1:k
+	ones = (-1)**(l_k + 1)
+	f = factorial(l_k)
+	p = r ** l_k
+	return(ones %*% (rev(v) * p / f))
+}
+
+qStuart <- function(r){
+	N = sum(!is.na(r))
+	v = rep(1, N + 1)
+	for(k in 1:N){
+		v[k + 1] = sumStuart(v[1:k], r[N - k + 1])
+	}
+	return(factorial(N) * v[N + 1])
+}
+
+stuart <- function(rmat){
+	rmat <- t(apply(rmat, 1, sort, na.last = TRUE))
+	return(apply(rmat, 1, qStuart))
+}
+
 # RRA helper functions
  
+#' Calculate beta scores
+#' 
 #' Calculate the beta scores for normalized rank vector.
 #' 
 #' Takes in a vector with values in [0, 1]. It sorts the values to get the order
@@ -97,6 +129,8 @@ betaScores <- function(r){
 	p <- pbeta(r, 1:n, n - 1:n + 1)
 	return(p)
 } 
+
+
 
 thresholdBetaScore <- function(r, k = seq_along(r), n = length(r), sigma = rep(1,n)){
 	if(length(sigma) != n) stop("The length of sigma does not match n")
@@ -157,11 +191,19 @@ thresholdBetaScore <- function(r, k = seq_along(r), n = length(r), sigma = rep(1
 
 
 correctBetaPvalues <- function(p, k){
-	p <- pbeta(p, 1, k)
+	p <- min(p * k, 1) 
+	
 	return(p)
 }
 
- 
+correctBetaPvaluesExact <- function(p, k){
+	rm = 1 - t(sapply(p, qbeta, 1:k, k - 1:k + 1))
+	res = 1 - stuart(rm)
+	return(res)
+}
+
+#' Calculate rho scores
+#' 
 #' Calculate Rho score for normalized rank vector
 #' 
 #' Takes in a vector with values in [0, 1]. Applies \code{\link{betaScores}} to the vector, takes the minimum of the beta scores and converts it to a valid p-value. 
@@ -169,6 +211,7 @@ correctBetaPvalues <- function(p, k){
 #' @param r vector of values in [0, 1]
 #' @param topCutoff a vector of cutoff values used to limit the number of elements in the 
 #' input lists
+#' @param exact indicator if exact p-values should be calculated (Warning: it is computationally unstable and does ot give considerable gain)
 #' @references  Kolde et al "Robust Rank Aggregation for gene list integration and 
 #' meta-analysis" (in preparation)
 #' @author  Raivo Kolde <rkolde@@gmail.com>
@@ -177,52 +220,32 @@ correctBetaPvalues <- function(p, k){
 #'  rhoScores(c(runif(10), rbeta(5, 1, 50)))
 #' 
 #' @export
-rhoScores <- function(r, topCutoff = NA){
+rhoScores <- function(r, topCutoff = NA, exact = F){
 	if(is.na(topCutoff[1])){
 		x <- betaScores(r)
-		rho <- correctBetaPvalues(min(x, na.rm = T), k = sum(!is.na(x)))
 	}
 	else{
 		r <- r[!is.na(r)]
 		r[r == 1] <- NA
 		x <- thresholdBetaScore(r, sigma = topCutoff)
-		rho <- correctBetaPvalues(min(x, na.rm = T), k = length(r))
+	}
+	if(exact){
+		rho <- correctBetaPvaluesExact(min(x, na.rm = T), k = sum(!is.na(x)))
+	}
+	else{
+		rho <- correctBetaPvalues(min(x, na.rm = T), k = sum(!is.na(x)))
 	}
 	
 	return(rho)
 }
 
-# Stuart-Aerts method helper functions
-sumStuart <- function(v, r){
-	k = length(v)
-	l_k = 1:k
-	ones = (-1)**(l_k + 1)
-	f = factorial(l_k)
-	p = r ** l_k
-	return(ones %*% (rev(v) * p / f))
-}
-
-qStuart <- function(r){
-	N = sum(!is.na(r))
-	v = rep(1, N + 1)
-	for(k in 1:N){
-		v[k + 1] = sumStuart(v[1:k], r[N - k + 1])
-	}
-	return(factorial(N) * v[N + 1])
-}
-
-stuart <- function(rmat){
-	rmat <- t(apply(rmat, 1, sort, na.last = TRUE))
-	return(apply(rmat, 1, qStuart))
-}
-
-
 # The dynamic algorithm for more accurate BetaScore calculation
 
 
-
-
-#' Aggregate ranked lists 
+#' Aggregate ranked lists
+#' 
+#' Method implementing various gene list aggregation methods, most notably Robust Rank 
+#' Aggregation.
 #' 
 #' All the methods implemented in this function make an assumtion that the number of
 #' ranked items is known. This assumption is satisfied for example in the case of 
@@ -263,6 +286,7 @@ stuart <- function(rmat){
 #' \code{'min'}, \code{'geom.mean'}, \code{'mean'}, \code{'median'} and \code{'stuart'} 
 #' @param full indicates if the full rankings are given, used if the the sets of ranked 
 #' elements do not match perfectly
+#' @param exact indicator showing if exact p-value will be calculated based on rho score (Default: if number of lists smaller than 10, exact is used)
 #' @param topCutoff a vector of cutoff values used to limit the number of elements in the 
 #' input lists
 #' elements do not match perfectly
@@ -304,7 +328,7 @@ stuart <- function(rmat){
 #' @aliases RobustRankAggreg
 #' 
 #' @export
-aggregateRanks <-  function(glist, rmat = rankMatrix(glist, N, full = full), N = NA, method = "RRA", full = FALSE, topCutoff = NA){
+aggregateRanks <-  function(glist, rmat = rankMatrix(glist, N, full = full), N = NA, method = "RRA", full = FALSE, exact = F, topCutoff = NA){
 
 	if(!(method %in% c("mean", "min", "median", "geom.mean", "RRA", "stuart"))){
 		stop("method should be one of:  'min', 'geom.mean', 'mean', 'median', 'stuart' or 'RRA' ")
@@ -327,11 +351,11 @@ aggregateRanks <-  function(glist, rmat = rankMatrix(glist, N, full = full), N =
 		return(formatOutput(scores = a, score.names = names(a), ordering = "ascending"))
 	}
 	if(method == "geom.mean"){
-		a <-  apply(rmat, 1, function(x) mean(log(x), na.rm = TRUE))
+		a <-  apply(rmat, 1, function(x) exp(mean(log(x), na.rm = TRUE)))
 		return(formatOutput(scores = a, score.names = names(a), ordering = "ascending"))
 	}
 	if(method == "RRA"){
-		a = apply(rmat, 1, rhoScores, topCutoff = topCutoff)
+		a = apply(rmat, 1, rhoScores, topCutoff = topCutoff, exact = exact)
 		names(a) <- rownames(rmat)
 		return(formatOutput(scores = a, score.names = names(a), ordering = "ascending"))
 	}
@@ -346,6 +370,13 @@ aggregateRanks <-  function(glist, rmat = rankMatrix(glist, N, full = full), N =
 		return(formatOutput(scores = a, score.names = names(a), ordering = "ascending"))
 	}
 }
+# 
+# require(foreach)
+# space = paste("X", 1:10000, sep = "")
+# gl = foreach(i = 1:10) %do% {sample(space)[1:1000]} 
+# ar = aggregateRanks(gl, exact = T, N = 10000)
+# ar2 = aggregateRanks(gl, exact = F, N = 10000)
+# quartz(); hist(ar[, 2])
 
 #' A dataset based on Reimand \emph{et al} and Hu \emph{et al}. It contains lists  
 #' yeast genes that were most influenced by 12 cell cycle related transcription factor 

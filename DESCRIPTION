@@ -1,7 +1,7 @@
 Package: RobustRankAggreg
 Type: Package
 Title: Methods for robust rank aggregation
-Version: 1.0
+Version: 1.1
 Date: 2010-11-14
 Author: Raivo Kolde, Sven Laur
 Maintainer: Raivo Kolde <rkolde@gmail.com>
@@ -16,6 +16,7 @@ License: GPL-2
 LazyLoad: yes
 Depends: methods
 Collate: 'aggregateRanks.R'
-Packaged: 2011-03-28 11:21:14 UTC; Kolde
+Packaged: 2013-06-03 14:46:02 UTC; kolde
+NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2011-03-28 14:28:20
+Date/Publication: 2013-06-03 17:47:53
