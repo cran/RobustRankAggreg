@@ -5,9 +5,9 @@
 #' Convert a set of ranked lists into a rank matrix
 #' 
 #' The lists are converted to a format that is used by aggregateRanks. If partial
-#' rankings are given to the function, all the missing values are subtituted by the
+#' rankings are given to the function, all the missing values are substituted by the
 #' maximum rank N, which can be specified manually. This parameter has a very strong
-#' influence on the performance of RRA algorithm, therfore it should be reasonably
+#' influence on the performance of RRA algorithm, therefore it should be reasonably
 #' accurate. If the N is different for the gene lists, it can be also given as a vector. 
 #' 
 #' Parameter full is used, when full rankings are given, but the sets of ranked elements
@@ -113,8 +113,7 @@ stuart <- function(rmat){
 #' @return  The functions returns a vector of p-values, that correspond to the sorted
 #' input vector. The NA-s are pushed to the end.
 #' 
-#' @references  Kolde et al "Robust Rank Aggregation for gene list integration and 
-#' meta-analysis" (in preparation)
+#' @references  Raivo Kolde, Sven Laur, Priit Adler, Jaak Vilo, Robust rank aggregation for gene list integration and meta-analysis, Bioinformatics, 2012,, https://doi.org/10.1093/bioinformatics/btr709
 #' 
 #' @author  Raivo Kolde <rkolde@@gmail.com>
 #' @examples
@@ -211,16 +210,16 @@ correctBetaPvaluesExact <- function(p, k){
 #' @param r vector of values in [0, 1]
 #' @param topCutoff a vector of cutoff values used to limit the number of elements in the 
 #' input lists
-#' @param exact indicator if exact p-values should be calculated (Warning: it is computationally unstable and does ot give considerable gain)
-#' @references  Kolde et al "Robust Rank Aggregation for gene list integration and 
-#' meta-analysis" (in preparation)
+#' @param exact indicator if exact p-values should be calculated (Warning: it is computationally unstable and does to give considerable gain)
+#' @value A rho score for the normalized rank vector.
+#' @references  Raivo Kolde, Sven Laur, Priit Adler, Jaak Vilo, Robust rank aggregation for gene list integration and meta-analysis, Bioinformatics, 2012,, https://doi.org/10.1093/bioinformatics/btr709
 #' @author  Raivo Kolde <rkolde@@gmail.com>
 #' @examples
 #'  rhoScores(c(runif(15)))
 #'  rhoScores(c(runif(10), rbeta(5, 1, 50)))
 #' 
 #' @export
-rhoScores <- function(r, topCutoff = NA, exact = F){
+rhoScores <- function(r, topCutoff = NA, exact = FALSE){
 	if(is.na(topCutoff[1])){
 		x <- betaScores(r)
 	}
@@ -230,10 +229,10 @@ rhoScores <- function(r, topCutoff = NA, exact = F){
 		x <- thresholdBetaScore(r, sigma = topCutoff)
 	}
 	if(exact){
-		rho <- correctBetaPvaluesExact(min(x, na.rm = T), k = sum(!is.na(x)))
+		rho <- correctBetaPvaluesExact(min(x, na.rm = TRUE), k = sum(!is.na(x)))
 	}
 	else{
-		rho <- correctBetaPvalues(min(x, na.rm = T), k = sum(!is.na(x)))
+		rho <- correctBetaPvalues(min(x, na.rm = TRUE), k = sum(!is.na(x)))
 	}
 	
 	return(rho)
@@ -260,7 +259,7 @@ rhoScores <- function(r, topCutoff = NA, exact = F){
 #' appropriately. 
 #' 
 #' The function can handle also the case when elements of the different rankings do not 
-#' overlap perfectly. For example if we combine resutls from different microarray 
+#' overlap perfectly. For example if we combine results from different microarray 
 #' platforms with varying coverage. In this case these structurally missing values are 
 #' substituted with NA-s and handled differently than omitted parts of the rankings. 
 #' The function accepts as an input either list of rankings or rank matrix based on them. 
@@ -282,7 +281,7 @@ rhoScores <- function(r, topCutoff = NA, exact = F){
 #' format.
 #' @param N the number of ranked elements, important when using only top-k ranks, by 
 #' default it is calculated as the number of unique elements in the input.
-#' @param method rank aggregation method, by defaylt \code{'RRA'}, other options are 
+#' @param method rank aggregation method, by default \code{'RRA'}, other options are 
 #' \code{'min'}, \code{'geom.mean'}, \code{'mean'}, \code{'median'} and \code{'stuart'} 
 #' @param full indicates if the full rankings are given, used if the the sets of ranked 
 #' elements do not match perfectly
@@ -292,8 +291,7 @@ rhoScores <- function(r, topCutoff = NA, exact = F){
 #' elements do not match perfectly
 #' @return  Returns a two column dataframe with the element names and associated scores 
 #' or p-values.
-#' @references  Kolde et al "Robust Rank Aggregation for gene list integration and 
-#' meta-analysis" (in preparation)
+#' @references  Raivo Kolde, Sven Laur, Priit Adler, Jaak Vilo, Robust rank aggregation for gene list integration and meta-analysis, Bioinformatics, 2012,, https://doi.org/10.1093/bioinformatics/btr709
 #' @author  Raivo Kolde <rkolde@@gmail.com>
 #' @examples
 #' # Make sample input data
@@ -328,7 +326,7 @@ rhoScores <- function(r, topCutoff = NA, exact = F){
 #' @aliases RobustRankAggreg
 #' 
 #' @export
-aggregateRanks <-  function(glist, rmat = rankMatrix(glist, N, full = full), N = NA, method = "RRA", full = FALSE, exact = F, topCutoff = NA){
+aggregateRanks <-  function(glist, rmat = rankMatrix(glist, N, full = full), N = NA, method = "RRA", full = FALSE, exact = FALSE, topCutoff = NA){
 
 	if(!(method %in% c("mean", "min", "median", "geom.mean", "RRA", "stuart"))){
 		stop("method should be one of:  'min', 'geom.mean', 'mean', 'median', 'stuart' or 'RRA' ")
@@ -374,8 +372,8 @@ aggregateRanks <-  function(glist, rmat = rankMatrix(glist, N, full = full), N =
 # require(foreach)
 # space = paste("X", 1:10000, sep = "")
 # gl = foreach(i = 1:10) %do% {sample(space)[1:1000]} 
-# ar = aggregateRanks(gl, exact = T, N = 10000)
-# ar2 = aggregateRanks(gl, exact = F, N = 10000)
+# ar = aggregateRanks(gl, exact = TRUE, N = 10000)
+# ar2 = aggregateRanks(gl, exact = FALSE, N = 10000)
 # quartz(); hist(ar[, 2])
 
 #' A dataset based on Reimand \emph{et al} and Hu \emph{et al}. It contains lists  
@@ -406,7 +404,9 @@ aggregateRanks <-  function(glist, rmat = rankMatrix(glist, N, full = full), N =
 #' @keywords data
 NULL
 
-
+#' @importFrom stats median pbeta pnorm qbeta
+#' @import methods
+NULL
 
 
 

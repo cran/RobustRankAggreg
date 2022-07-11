@@ -1,9 +1,9 @@
-0ff1a2595f00f096cc9be281fd200c25 *DESCRIPTION
-e8c7a00dbea3e0b10ac9c90c85ffee64 *NAMESPACE
-b08bc690e5e60d992da1e97807580771 *R/aggregateRanks.R
+9e3403ac9189bf3385bb731d3b40da70 *DESCRIPTION
+480cec37c71535e272f908bc96290035 *NAMESPACE
+2c95ed71bfb9c0c12162229905745c5b *R/aggregateRanks.R
 aeeb965cf7a7d5061a87222218dbb1ba *data/cellCycleKO.RData
-9c8e34c72f846801b7a1b46d00d6bced *man/aggregateRanks.Rd
-b3c3c234c92768e2e8d3c35cdaa4ddb2 *man/betaScores.Rd
-c2bea0fc511f0abb6037e26f9c207e64 *man/cellCycleKO.Rd
-dc4b38df1b525e6d27e6ba9df94c88cf *man/rankMatrix.Rd
-92dabed623a12a186d46abb1559dacf9 *man/rhoScores.Rd
+77abeac2cebf24111009feb0361daad4 *man/aggregateRanks.Rd
+7dedc1933a63d69aa5029b7791d45f5b *man/betaScores.Rd
+22f846cb4ce18571d74422877d8c921b *man/cellCycleKO.Rd
+aef4732ce0686efbd71b8abd949bb192 *man/rankMatrix.Rd
+baed2cd5a60c95c9209472d7d779cd73 *man/rhoScores.Rd
