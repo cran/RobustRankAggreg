@@ -14,6 +14,9 @@ input lists}
 
 \item{exact}{indicator if exact p-values should be calculated (Warning: it is computationally unstable and does to give considerable gain)}
 }
+\value{
+A rho score for the normalized rank vector.
+}
 \description{
 Calculate Rho score for normalized rank vector
 }

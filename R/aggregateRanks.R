@@ -211,7 +211,7 @@ correctBetaPvaluesExact <- function(p, k){
 #' @param topCutoff a vector of cutoff values used to limit the number of elements in the 
 #' input lists
 #' @param exact indicator if exact p-values should be calculated (Warning: it is computationally unstable and does to give considerable gain)
-#' @value A rho score for the normalized rank vector.
+#' @return  A rho score for the normalized rank vector.
 #' @references  Raivo Kolde, Sven Laur, Priit Adler, Jaak Vilo, Robust rank aggregation for gene list integration and meta-analysis, Bioinformatics, 2012,, https://doi.org/10.1093/bioinformatics/btr709
 #' @author  Raivo Kolde <rkolde@@gmail.com>
 #' @examples
@@ -376,7 +376,9 @@ aggregateRanks <-  function(glist, rmat = rankMatrix(glist, N, full = full), N =
 # ar2 = aggregateRanks(gl, exact = FALSE, N = 10000)
 # quartz(); hist(ar[, 2])
 
-#' A dataset based on Reimand \emph{et al} and Hu \emph{et al}. It contains lists  
+#' A dataset based on Reimand \emph{et al} and Hu \emph{et al}. 
+#' 
+#' The dataset contains lists  
 #' yeast genes that were most influenced by 12 cell cycle related transcription factor 
 #' knockouts. 
 #' The dataset is a list with 3 slots

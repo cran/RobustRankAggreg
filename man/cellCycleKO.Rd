@@ -3,19 +3,9 @@
 \docType{data}
 \name{cellCycleKO}
 \alias{cellCycleKO}
-\title{A dataset based on Reimand \emph{et al} and Hu \emph{et al}. It contains lists  
-yeast genes that were most influenced by 12 cell cycle related transcription factor 
-knockouts. 
-The dataset is a list with 3 slots
-\enumerate{ 
-	\item \code{gl} - set of gene lists in a format suitable for 
-\code{\link{aggregateRanks}};
-	\item \code{N} - number of yeast genes; 
-	\item \code{ref} - reference list of cell cycle related genes taken from  de 
-Lichtenberg \emph{et al}.
-}}
+\title{A dataset based on Reimand \emph{et al} and Hu \emph{et al}.}
 \description{
-A dataset based on Reimand \emph{et al} and Hu \emph{et al}. It contains lists  
+The dataset contains lists  
 yeast genes that were most influenced by 12 cell cycle related transcription factor 
 knockouts. 
 The dataset is a list with 3 slots

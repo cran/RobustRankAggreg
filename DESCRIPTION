@@ -1,8 +1,8 @@
 Package: RobustRankAggreg
 Type: Package
 Title: Methods for Robust Rank Aggregation
-Version: 1.2
-Date: 2022-07-11
+Version: 1.2.1
+Date: 2022-09-12
 Authors@R: c(
     person("Raivo", "Kolde", role = c("aut", "cre"),
            email = "rkolde@gmail.com",
@@ -21,10 +21,11 @@ License: GPL-2
 LazyLoad: yes
 Depends: methods
 Collate: 'aggregateRanks.R'
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.1
+Encoding: UTF-8
 NeedsCompilation: no
-Packaged: 2022-07-11 19:56:04 UTC; raivokolde
+Packaged: 2022-09-12 12:15:36 UTC; raivokolde
 Author: Raivo Kolde [aut, cre] (<https://orcid.org/0000-0003-2886-6298>),
   Sven Laur [ctb] (<https://orcid.org/0000-0002-9891-3347>)
 Repository: CRAN
-Date/Publication: 2022-07-12 00:20:02 UTC
+Date/Publication: 2022-10-03 11:10:02 UTC
